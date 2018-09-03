@@ -6,9 +6,9 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/NebulousLabs/fastrand"
 )
@@ -72,9 +72,13 @@ func getIpHandler() http.Handler {
 		} else {
 			clientAddr = r.RemoteAddr
 		}
-		host, _, err := net.SplitHostPort(clientAddr)
-		if err != nil {
+
+		host := ""
+		if clientAddr == "" {
 			host = "unknown"
+		} else {
+			portColon := strings.LastIndex(clientAddr, ":")
+			host = clientAddr[:portColon]
 		}
 		w.Write([]byte(host))
 	})
