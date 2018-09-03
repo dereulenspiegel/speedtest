@@ -126,7 +126,7 @@ func garbageHandler() http.Handler {
 }
 
 func emptyHandler() http.Handler {
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		io.Copy(ioutil.Discard, r.Body)
 		r.Body.Close()
 		switch r.Method {
@@ -143,22 +143,4 @@ func emptyHandler() http.Handler {
 			http.Error(w, invalidMethod.Error(), http.StatusMethodNotAllowed)
 		}
 	})
-
-	/*handlerIfElse := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.Body.Close()
-		if r.Method == http.MethodGet {
-			w.WriteHeader(http.StatusOK)
-			return
-		} else if r.Method == http.MethodPost {
-			w.Header().Add(HeaderCacheControl, "no-store, no-cache, must-revalidate, max-age=0")
-			w.Header().Add(HeaderCacheControl, "post-check=0, pre-check=0")
-			w.Header().Add(HeaderPragma, "no-cache")
-			w.WriteHeader(http.StatusOK)
-			return
-		} else {
-			http.Error(w, invalidMethod.Error(), http.StatusMethodNotAllowed)
-		}
-	})*/
-
-	return handler
 }
