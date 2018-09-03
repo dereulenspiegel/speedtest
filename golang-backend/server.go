@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"flag"
+	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -62,11 +64,13 @@ func getIpHandler() http.Handler {
 			http.Error(w, invalidMethod.Error(), http.StatusMethodNotAllowed)
 			return
 		}
-		clientAddr := r.RemoteAddr
+		clientAddr := ""
 		if headerRealIp := r.Header.Get("X-Real-IP"); headerRealIp != "" {
 			clientAddr = headerRealIp
 		} else if headerRealIp = r.Header.Get("HTTP_X_FORWARDED_FOR"); headerRealIp != "" {
 			clientAddr = headerRealIp
+		} else {
+			clientAddr = r.RemoteAddr
 		}
 		host, _, err := net.SplitHostPort(clientAddr)
 		if err != nil {
@@ -119,6 +123,7 @@ func garbageHandler() http.Handler {
 
 func emptyHandler() http.Handler {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		io.Copy(ioutil.Discard, r.Body)
 		r.Body.Close()
 		switch r.Method {
 		case http.MethodGet:
