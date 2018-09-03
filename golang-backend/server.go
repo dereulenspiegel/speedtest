@@ -34,14 +34,13 @@ var (
 
 var (
 	serveAddr = flag.String("http.addr", ":8080", "Listen addr for the http server")
-	staticDir = flag.String("static.dir", "../", "Directory to server static files from")
 )
 
 func main() {
 	flag.Parse()
 	mux := http.NewServeMux()
 
-	mux.Handle("/", serveStatic(*staticDir))
+	mux.Handle("/", serveStatic())
 	mux.Handle("/empty.php", emptyHandler())
 	mux.Handle("/garbage.php", garbageHandler())
 	mux.Handle("/getIP.php", getIpHandler())
@@ -62,11 +61,8 @@ func getIpHandler() http.Handler {
 			http.Error(w, invalidMethod.Error(), http.StatusMethodNotAllowed)
 			return
 		}
+		//r.RemoteAddr
 	})
-}
-
-func serveStatic(staticDir string) http.Handler {
-	return http.FileServer(http.Dir(staticDir))
 }
 
 func garbageHandler() http.Handler {
