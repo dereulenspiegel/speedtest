@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 
@@ -61,7 +62,17 @@ func getIpHandler() http.Handler {
 			http.Error(w, invalidMethod.Error(), http.StatusMethodNotAllowed)
 			return
 		}
-		//r.RemoteAddr
+		clientAddr := r.RemoteAddr
+		if headerRealIp := r.Header.Get("X-Real-IP"); headerRealIp != "" {
+			clientAddr = headerRealIp
+		} else if headerRealIp = r.Header.Get("HTTP_X_FORWARDED_FOR"); headerRealIp != "" {
+			clientAddr = headerRealIp
+		}
+		host, _, err := net.SplitHostPort(clientAddr)
+		if err != nil {
+			host = "unknown"
+		}
+		w.Write([]byte(host))
 	})
 }
 
